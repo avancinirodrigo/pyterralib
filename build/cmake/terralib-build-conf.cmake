@@ -13,7 +13,7 @@ elseif(WIN32)
 	set(terralib4_DIR "$ENV{_TERRALIB_3RDPARTY_LIBS_DIR}/lib/cmake/terralib-4.2.2" CACHE PATH "TerraLib4?" FORCE)
 endif()
 
-#set(TERRALIB_DIR_VAR_NAME "TERRALIBPATH" CACHE STRING "Name of an environment variable with the base installation path of TerraLib")
+set(TERRALIB_DIR_VAR_NAME "PYTERRALIBPATH" CACHE STRING "Name of an environment variable with the base installation path of TerraLib")
 
 set(TERRALIB_BUILD_EXAMPLES_ENABLED OFF CACHE BOOL "Build the examples?" FORCE)
 set(TERRALIB_EXAMPLE_ADO_ENABLED OFF CACHE BOOL "Build the TerraLib with ADO?" FORCE)

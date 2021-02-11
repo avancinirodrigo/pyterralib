@@ -1,0 +1,5 @@
+recursive-include terralib/share/proj *
+recursive-include terralib/share/terralib/config *
+recursive-include terralib/share/terralib/json *
+recursive-include terralib/share/terralib/plugins *
+recursive-include terralib/share/terralib/schemas *

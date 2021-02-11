@@ -55,7 +55,7 @@ export _TERRALIB_BUILD_DIR="$_TERRALIB_BUILD_DIR"
 echo "TerraLib building dir $_TERRALIB_BUILD_DIR"
 
 if [ "$_TERRALIB_GIT_DIR" == "" ]; then
-  _TERRALIB_GIT_DIR="$_TERRALIB_ROOT_DIR/git/terralib"
+  _TERRALIB_GIT_DIR="/home/dev/terralib/git/terralib"
 fi
 export _TERRALIB_GIT_DIR="$_TERRALIB_GIT_DIR"
 echo "TerraLib git dir $_TERRALIB_GIT_DIR"
@@ -65,7 +65,7 @@ mkdir -p $_TERRALIB_3RDPARTY_DIR
 cd $_TERRALIB_3RDPARTY_DIR
 wget -nc http://www.dpi.inpe.br/terralib5-devel/3rdparty/src/5.5/terralib-3rdparty-linux-ubuntu-18.04.tar.gz  
 cp $_TERRALIB_GIT_DIR/install/install-3rdparty-linux-ubuntu-18.04.sh .
-TERRALIB_DEPENDENCIES_DIR="$_TERRALIB_3RDPARTY_LIBS_DIR" ./install-3rdparty-linux-ubuntu-18.04.sh 
+# TERRALIB_DEPENDENCIES_DIR="$_TERRALIB_3RDPARTY_LIBS_DIR" ./install-3rdparty-linux-ubuntu-18.04.sh 
 
 mkdir -p $_TERRALIB_SOLUTION_DIR
 cd $_TERRALIB_SOLUTION_DIR
@@ -76,24 +76,37 @@ cmake -G "Unix Makefiles" -C $_PYTERRALIB_GIT_DIR/build/cmake/terralib-build-con
 cmake --build . --target install --config Release 
 
 cd $_PYTERRALIB_BUILD_DIR
-mkdir -p terralib
+mkdir -p terralib/share
 
 cp $_TERRALIB_INSTALL_DIR/bindings/python/terralib/* terralib
 rm -rf terralib/__init__.py
 cp $_PYTERRALIB_GIT_DIR/__init__.py terralib
 
-cp $_TERRALIB_INSTALL_DIR/lib/*.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_locale.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_regex.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_filesystem.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_system.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_log.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_log_setup.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_thread.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_thread.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_date_time.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libgeos-*.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libxerces-*.so* terralib
-cp $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libproj*.so* terralib
+cp -P $_TERRALIB_INSTALL_DIR/lib/*.so* terralib
+cp -Pr $_TERRALIB_INSTALL_DIR/share/* terralib/share
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_locale.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_regex.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_filesystem.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_system.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_log.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_log_setup.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_thread.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_thread.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libboost_date_time.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libgeos-*.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libxerces-*.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libproj*.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libcrypto*.so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libsz*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libgeotiff*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libjpeg*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libpng*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libspatialite*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libpcre*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/pgsql/lib/libpq*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libfreexl*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libgdal*so* terralib
+cp -P $_TERRALIB_3RDPARTY_LIBS_DIR/lib/libcurl*so* terralib
 
 ln -sf $_PYTERRALIB_GIT_DIR/setup.py .
+ln -sf $_PYTERRALIB_GIT_DIR/MANIFEST.in .
