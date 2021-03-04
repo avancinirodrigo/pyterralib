@@ -80,7 +80,7 @@ mkdir -p terralib/share
 
 cp $_TERRALIB_INSTALL_DIR/bindings/python/terralib/* terralib
 rm -rf terralib/__init__.py
-cp $_PYTERRALIB_GIT_DIR/__init__.py terralib
+cp $_PYTERRALIB_GIT_DIR/terralib/__init__.py terralib
 
 cp -P $_TERRALIB_INSTALL_DIR/lib/*.so* terralib
 cp -Pr $_TERRALIB_INSTALL_DIR/share/* terralib/share
