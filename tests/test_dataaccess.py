@@ -6,7 +6,7 @@ from terralib import core
 from terralib import dataaccess
 from terralib import datatype
 from terralib import geometry
-
+from terralib_helper import PostGISURI, PostGISHelper
 
 def test_read_shp(terralib_initialize):
 	filepath = os.path.join(os.path.dirname(__file__), 'data', 'deter-amz-ccst.shp')
@@ -54,63 +54,15 @@ def test_postgis_export(terralib_initialize):
 	shp_ds = DataSourceFactory.make('OGR', shp_uri)
 	shp_ds.open() 
 	shp_ds.setEncoding(core.EncodingType_LATIN1)
-	#encoding = CharEncoding.getEncodingName('LATIN1')
-
-	pg_info = {
-		'user': 'postgres',
-		'password': 'postgres',
-		'host': 'localhost',
-		'port': '5432',
-		'database': 'postgis_export',
-		'encoding': 'ISO-8859-1' #encoding
-	}
-
-	pg_conn_info = ('pgsql://' 
-							+ pg_info['user'] + ':'
-							+ pg_info['password'] + '@'
-							+ pg_info['host'] + ':'
-							+ pg_info['port'] + '/?'
-							+ '&PG_NEWDB_NAME=' + pg_info['database']
-							+ '&PG_NEWDB_OWNER=' + pg_info['user']
-							+ '&PG_NEWDB_ENCODING=' + pg_info['encoding']
-							+ '&PG_CLIENT_ENCODING=' + pg_info['encoding']
-							+ '&PG_CONNECT_TIMEOUT=10'
-							+ '&PG_MAX_POOL_SIZE=4'
-							+ '&PG_MIN_POOL_SIZE=2'
-							+ '&PG_HIDE_SPATIAL_METADATA_TABLES=FALSE'
-							+ '&PG_HIDE_RASTER_TABLES=FALSE'
-							+ '&PG_DB_TO_DROP=' + pg_info['database']
-							+ '&PG_CHECK_DB_EXISTENCE=' + pg_info['database']
-	)
-
-	if DataSource.exists('POSTGIS', pg_conn_info):
-		DataSource.drop('POSTGIS', pg_conn_info)
-
-	DataSource.create('POSTGIS', pg_conn_info)
-
-	pg_conn_info = ('pgsql://' 
-							+ pg_info['user'] + ':'
-							+ pg_info['password'] + '@'
-							+ pg_info['host'] + ':'
-							+ pg_info['port'] + '/'
-							+ pg_info ['database'] + '?'
-							+ '&PG_CLIENT_ENCODING=' + pg_info['encoding']
-							+ '&PG_CONNECT_TIMEOUT=10'
-							+ '&PG_MAX_POOL_SIZE=4'
-							+ '&PG_MIN_POOL_SIZE=2'
-							+ '&PG_HIDE_SPATIAL_METADATA_TABLES=FALSE'
-							+ '&PG_HIDE_RASTER_TABLES=FALSE'
-							+ '&PG_DB_TO_DROP=' + pg_info['database']
-							+ '&PG_CHECK_DB_EXISTENCE=' + pg_info['database']
-	)
-
 	dsename = shp_ds.getDataSetNames()[0]	
 	shp_dst = shp_ds.getDataSetType(dsename)
 	shp_dse = shp_ds.getDataSet(dsename)
 	pg_dse_name = 'deter_amz_ccst'
 	shp_dst.setName(pg_dse_name)  # TODO: this shouldn't be necessary
-
-	pg_ds = DataSourceFactory.make('POSTGIS', pg_conn_info)
+	
+	pg_uri = PostGISURI(user='postgres', password='postgres', database='postgis_export')
+	PostGISHelper.create(pg_uri, True)
+	pg_ds = DataSourceFactory.make('POSTGIS', pg_uri.to_connect())
 	pg_ds.open()	
 
 	converter = DataSetTypeConverter(shp_dst, pg_ds.getCapabilities())
@@ -122,21 +74,11 @@ def test_postgis_export(terralib_initialize):
 	pg_ds.createDataSet(dst_result, {})
 	pg_ds.add(pg_dse_name, dse_adaptee, {})
 
-	# del converter
-	# del dst_result
-	# del dse_adaptee
-
 	assert pg_ds.getNumberOfDataSets() == 1
 	assert f'public.{pg_dse_name}' == pg_ds.getDataSetNames()[0] 
 	assert CharEncoding.getEncodingName(pg_ds.getEncoding()) == 'UTF-8'
-	# pg_ds.close()
-	# del pg_ds
 
-	# pg_ds = DataSourceFactory.make('POSTGIS', pg_conn_info)
-	# pg_ds.open()
-	# pg_tran = pg_ds.getTransactor()  # TODO: pg_ds.getDataSet() is not working
 	pg_dse = pg_ds.getDataSet(pg_dse_name)
-
 	assert pg_dse.getNumProperties() == 18
 	assert pg_dse.getPropertyName(0) == 'fid'
 	assert pg_dse.getPropertyName(17) == 'ogr_geometry'
@@ -155,29 +97,14 @@ def test_postgis_export(terralib_initialize):
 	pointB = pg_dse.getGeometry(17).getCentroid()
 	assert pointB.x == 5292183.974363609
 	assert pointB.y == 9343686.127080787
-	pg_dst = pg_ds.getDataSetType(dsename)
+	pg_dst = pg_ds.getDataSetType(pg_dse_name)
 	gp = dataaccess.GetFirstGeomProperty(pg_dst)
 	assert gp.getSRID() == 5880	
 
 	pg_ds.dropDataSet(pg_dse_name)
+	assert pg_ds.dataSetExists(pg_dse_name) is False
 	pg_ds.close()
 	assert not pg_ds.isOpened()
 
-	# TODO: ERROR:  cannot drop the currently open database
-	pg_conn_info = ('pgsql://' 
-							+ pg_info['user'] + ':'
-							+ pg_info['password'] + '@'
-							+ pg_info['host'] + ':'
-							+ pg_info['port'] + '/'
-							+ 'postgres?'
-							+ '&PG_CLIENT_ENCODING=' + pg_info['encoding']
-							+ '&PG_CONNECT_TIMEOUT=10'
-							+ '&PG_MAX_POOL_SIZE=4'
-							+ '&PG_MIN_POOL_SIZE=2'
-							+ '&PG_HIDE_SPATIAL_METADATA_TABLES=FALSE'
-							+ '&PG_HIDE_RASTER_TABLES=FALSE'
-							+ '&PG_DB_TO_DROP=' + pg_info['database']
-							+ '&PG_CHECK_DB_EXISTENCE=' + pg_info['database']
-	)
-
-	DataSource.drop('POSTGIS', pg_conn_info)
+	PostGISHelper.drop(pg_uri)
+	assert PostGISHelper.exists(pg_uri) is False
